@@ -1,3 +1,16 @@
+/*
+ * CH559.h
+ *
+ * This file is derived from the CH559sdccUSBHost project:
+ * https://github.com/atc1441/CH559sdccUSBHost
+ *
+ * Original author: atc1441
+ * Original project license: GNU General Public License v3.0 (GPL-3.0)
+ *
+ * This file is included in Embedded-DevOps-Template as a third-party
+ * component and is not relicensed under the MIT License of this project.
+ */
+ 
 #ifndef __CH559_H__
 #define __CH559_H__
 
