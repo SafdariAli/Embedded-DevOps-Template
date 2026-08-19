@@ -1,7 +1,7 @@
 docker run --rm -it `
   -v "${PWD}\:/workspace" `
   -w /workspace/ `
-  embedded-tdd:1.0.0 `
+  safdariali/ceedling:latest `
   ceedling test:all
 
 if (Test-Path .\build) { Remove-Item -Path .\build -Recurse -Force }
