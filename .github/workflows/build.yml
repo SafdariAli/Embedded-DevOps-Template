@@ -23,6 +23,8 @@ on:
       - 'cmake/**'
       - '.github/workflows/build.yml'
 
+permissions:
+  contents: write
 
 jobs:
 
