@@ -1,0 +1,104 @@
+name: Build CH559L Blink
+
+on:
+  push:
+    paths:
+      - 'apps/blink/**'
+      - 'platforms/ch559l/**'
+      - 'platform-execution/ch559l/baremetal/**'
+      - 'execution/baremetal/blink/**'
+      - 'build-targets/ch559l-baremetal/blink/**'
+      - 'cmake/**'
+      - '.github/workflows/build.yml'
+    tags:
+      - 'v*'
+
+  pull_request:
+    paths:
+      - 'apps/blink/**'
+      - 'platforms/ch559l/**'
+      - 'platform-execution/ch559l/baremetal/**'
+      - 'execution/baremetal/blink/**'
+      - 'build-targets/ch559l-baremetal/blink/**'
+      - 'cmake/**'
+      - '.github/workflows/build.yml'
+
+
+jobs:
+
+  build:
+    name: CH559L / Baremetal / Blink
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ======================================================
+      # Checkout
+      # ======================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ======================================================
+      # Unit Tests
+      # ======================================================
+
+      - name: Run unit tests
+        run: |
+          docker run --rm \
+            -v "$PWD/apps/blink:/workspace" \
+            -w /workspace \
+            safdariali/ceedling:latest \
+            ceedling test:all
+
+
+      # ======================================================
+      # Configure + Build Firmware
+      # ======================================================
+
+      - name: Configure and build firmware
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/build-targets/ch559l-baremetal/blink \
+            safdariali/sdcc-8051:cmake \
+            sh -c "
+              cmake \
+                -S . \
+                -B build \
+                -G Ninja \
+                -DCMAKE_TOOLCHAIN_FILE=/workspace/cmake/ch559l-sdcc.cmake &&
+              cmake --build build
+            "
+
+
+      # ======================================================
+      # Upload Artifact
+      # ======================================================
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ch559l-baremetal-blink
+          path: |
+            build-targets/ch559l-baremetal/blink/build/firmware.ihx
+            build-targets/ch559l-baremetal/blink/build/firmware.hex
+            build-targets/ch559l-baremetal/blink/build/firmware.bin
+
+
+      # ======================================================
+      # GitHub Release
+      # ======================================================
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: CH559L Blink ${{ github.ref_name }}
+          files: |
+            build-targets/ch559l-baremetal/blink/build/firmware.ihx
+            build-targets/ch559l-baremetal/blink/build/firmware.hex
+            build-targets/ch559l-baremetal/blink/build/firmware.bin
+          generate_release_notes: true
