@@ -1,4 +1,4 @@
-#include "CH559.H"
+#include "CH559.h"
 #include "delay.h"
 
 static void delay_us(unsigned int us)
